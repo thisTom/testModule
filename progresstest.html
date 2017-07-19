@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="../jquery_last.min.js"></script>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            padding-top: 100px;
+            text-align: center;
+        }
+        #graph{
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            line-height: 200px;
+            text-align: center;
+            color: #ffffff;
+        }
+        #graph canvas{
+            position: absolute;
+            z-index: -1;
+            left: 0;
+            top:0;
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="graph" data-percent="75"></div>
+
+    <script>
+        (function () {
+            var el = document.getElementById('graph'),
+                options = {
+                    percent:  el.getAttribute('data-percent') || 0,
+                    size: el.getAttribute('data-size') || Math.min(el.clientWidth,el.clientHeight),
+                    waveColor: el.getAttribute('data-wavecolor') || '#03a9f4',
+                    waveWidth: el.getAttribute('data-wavewidth') || 0.05,
+                    waveHeight: el.getAttribute('data-waveheight') || 5,
+                    waveSpeed: el.getAttribute('data-wavespeed') || .1,
+                    moveOffset: el.getAttribute('data-moveoffset') || .1,
+                },
+                canvas = document.createElement('canvas'),//canvas ele
+                span = document.createElement('span'),//text ele
+                ctx = canvas.getContext('2d');//context obj
+
+            //ie init
+            if (typeof(G_vmlCanvasManager) !== 'undefined') {
+                G_vmlCanvasManager.initElement(canvas);
+            }
+
+            canvas.width = canvas.height = options.size * window.devicePixelRatio;
+            span.textContent = options.percent + '%';
+            el.appendChild(canvas);
+            el.appendChild(span);
+
+            //绘制一帧波纹
+            var startY=options.size-options.percent * 0.01 * options.size,
+                circleDrew = false,
+                waveGradient=ctx.createLinearGradient(0,0,0,options.size),
+                drawCircle = function(){
+                    ctx.beginPath();
+                    waveGradient.addColorStop(0,"#03a9f4");
+                    waveGradient.addColorStop(1,"#4caf50");
+                    ctx.strokeStyle = waveGradient;
+                    ctx.arc(options.size/2, options.size/2, options.size/2 - 1, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(options.size/2, options.size/2, options.size/2 - 7, 0, 2 * Math.PI);
+                    ctx.setAntiAlias=true;
+                    ctx.clip();
+                    circleDrew=true;
+                },
+                drawWave=function () {
+                    ctx.save();
+                    ctx.beginPath();
+                    //在整个轴长上取点
+                    options.moveOffset+=options.waveSpeed;
+                    var points=[];
+                    for(var x = 0; x < options.size; x ++){
+                        var y = -options.waveHeight * Math.sin(x * options.waveWidth + options.moveOffset);
+                        ctx.lineTo(x, startY + y);
+                        points.push([x, startY + y]);
+                    }
+                    //封闭路径
+                    ctx.lineTo(options.size, options.size);
+                    ctx.lineTo(0, options.size);
+                    ctx.lineTo(points[0][0],points[0][1]);
+                    waveGradient.addColorStop(0,"#03a9f4");
+                    waveGradient.addColorStop(1,"#4caf50");
+                    ctx.fillStyle=waveGradient;
+                    ctx.fill();
+                    ctx.restore();
+                };
+            render=function () {
+                ctx.clearRect(0, 0, options.size,options.size);
+                if(!circleDrew) drawCircle();
+                drawWave();
+                requestAnimationFrame(render);
+            };
+            render();
+        })();
+    </script>
+</body>
+</html>

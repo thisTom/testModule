@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script type="application/javascript" src="../jquery_last.min.js"></script>
+</head>
+<body>
+    <p class="timer">
+        租赁时长 :
+        <span>0</span><span>0</span><b>:</b><span>0</span><span>0</span><b>:</b><span>0</span><span>0</span>
+    </p>
+    <script>
+        var startTime = 20000,
+            _fixedNumber = function (num, number) {
+                return (Array(num).join(0) + Number(number)).slice(-num);
+            };
+        setInterval(function () {
+            startTime ++;
+            var hourTimeString = _fixedNumber(2, parseInt(startTime / 3600)),
+                minTimeString = _fixedNumber(2, parseInt(startTime % 3600 / 60)),
+                secTimeString = _fixedNumber(2, startTime % 3600 % 60),
+                fullTimeString = hourTimeString + minTimeString + secTimeString;
+            for (var i = 0; i < 6; i++) {
+                $('.timer span').eq(i).text(fullTimeString.slice(i, i + 1))
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
